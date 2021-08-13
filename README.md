@@ -2,7 +2,7 @@
 
 Implementation of the REINFORCE algorithm and as described in the paper Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning [[1]](#references).
 
-The algorithm follows REINFORCE with Baseline (episodic) from Reinforcement Learning: An Introduction, p. 330 [[1]](#references).
+The algorithm follows REINFORCE with Baseline (episodic) from Reinforcement Learning: An Introduction, p. 330 [[2]](#references).
 
 I provide a `main.py` as well as a Jupyter Notebook which demonstrate how to set up, train and compare multiple agents.
 
