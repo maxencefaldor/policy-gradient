@@ -17,32 +17,21 @@ class Actor(nn.Module):
             n_neurons: int, number of neurons of the hidden layers.
         """
         super(Actor, self).__init__()
-        self.fc1 = nn.Linear(n_features, n_neurons)
-        self.fc2 = nn.Linear(n_neurons, n_neurons)
-        self.fc3 = nn.Linear(n_neurons, n_actions)
-    
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return F.softmax(x, dim=1)
-
-class Baseline(nn.Module):
-    """Classic baseline network architecture."""
-    
-    def __init__(self, n_features, n_neurons):
-        """Creates the layers.
+        self.policy_fc1 = nn.Linear(n_features, n_neurons)
+        self.policy_fc2 = nn.Linear(n_neurons, n_neurons)
+        self.policy_fc3 = nn.Linear(n_neurons, n_actions)
         
-        Args:
-            n_features: int, number of neurons of the first layer.
-            n_neurons: int, number of neurons of the hidden layers.
-        """
-        super(Baseline, self).__init__()
-        self.fc1 = nn.Linear(n_features, n_neurons)
-        self.fc2 = nn.Linear(n_neurons, n_neurons)
-        self.fc3 = nn.Linear(n_neurons, 1)
+        self.baseline_fc1 = nn.Linear(n_features, n_neurons)
+        self.baseline_fc2 = nn.Linear(n_neurons, n_neurons)
+        self.baseline_fc3 = nn.Linear(n_neurons, 1)
     
     def forward(self, x):
+        x = F.relu(self.policy_fc1(x))
+        x = F.relu(self.policy_fc2(x))
+        x = self.policy_fc3(x)
+        return F.softmax(x, dim=1)
+    
+    def baseline(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)

@@ -19,7 +19,9 @@ class ReinforceAgent(object):
                  device,
                  n_actions,
                  actor,
+                 baseline=None,
                  lr_actor=0.001,
+                 lr_baseline=0.001,
                  gamma=0.99):
         """Initializes the agent.
         
@@ -33,10 +35,13 @@ class ReinforceAgent(object):
         self._device = device
         self.n_actions = n_actions
         self.actor = actor
+        self.baseline = baseline
         self.optimizer_actor = optim.Adam(self.actor.parameters(), lr=lr_actor)
+        self.optimizer_baseline = optim.Adam(self.baseline.parameters(), lr=lr_baseline)
         self.gamma = gamma
         self.rewards = []
         self.log_probs = []
+        self.baselines = []
         self.step = 0
     
     def act(self, state):
@@ -48,16 +53,16 @@ class ReinforceAgent(object):
         Returns:
             int, action sampled from the policy.
         """
-        prob = self.actor(torch.tensor(
-            state, dtype=torch.float32).to(self._device).unsqueeze(0))
+        prob = self.actor(state)
         m = Categorical(prob)
         action = m.sample()
-        self.log_probs.append(m.log_prob(action))
+        self.log_probs.append(m.log_prob(action).squeeze(0))
         return action.item()
     
     def learn(self):
         """Learns the policy from an episode."""
         G = 0
+        baseline_loss = []
         policy_loss = []
         returns = []
         for reward in reversed(self.rewards):
@@ -65,18 +70,28 @@ class ReinforceAgent(object):
             returns.append(G)
         returns.reverse()
         returns = torch.tensor(returns)
-        returns = (returns - returns.mean()) / (returns.std() + 1e-9)
+        baselines = torch.cat(self.baselines)
+        deltas = returns - baselines
+        deltas = (deltas - deltas.mean()) / (deltas.std() + 1e-9)
         
-        for log_prob, G in zip(self.log_probs, returns):
-            policy_loss.append(-log_prob * G)
+        for log_prob, G, baseline, delta in zip(self.log_probs, returns, baselines, deltas):
+            baseline_loss.append(F.mse_loss(baseline, G, reduction='none'))
+            policy_loss.append(-log_prob * delta)
+        
+        self.optimizer_baseline.zero_grad()
+        baseline_loss = torch.stack(baseline_loss).mean()
+        baseline_loss.backward(retain_graph=True)
         
         self.optimizer_actor.zero_grad()
-        policy_loss = torch.cat(policy_loss).sum()
+        policy_loss = torch.stack(policy_loss).sum()
         policy_loss.backward()
+        
+        self.optimizer_baseline.step()
         self.optimizer_actor.step()
         
         del self.rewards[:]
         del self.log_probs[:]
+        del self.baselines[:]
     
     def train(self, env, n_episodes):
         """Trains the agent in the environment for n_episodes episodes.
@@ -95,6 +110,8 @@ class ReinforceAgent(object):
             episode_return = 0
             state = env.reset()
             for t in count():
+                state = torch.Tensor(state).to(self._device).unsqueeze(0)
+                self.baselines.append(self.baseline(state).squeeze(0))
                 action = self.act(state)
                 next_state, reward, done, _ = env.step(action)
                 self.rewards.append(reward)
