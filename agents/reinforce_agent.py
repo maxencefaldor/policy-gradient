@@ -57,15 +57,18 @@ class ReinforceAgent(object):
     
     def learn(self):
         """Learns the policy from an episode."""
-        R = 0
+        G = 0
         policy_loss = []
         returns = []
         for reward in reversed(self.rewards):
-            R = reward + self.gamma * R
-            returns.append(R)
+            G = reward + self.gamma * G
+            returns.append(G)
         returns.reverse()
-        for log_prob, R in zip(self.log_probs, returns):
-            policy_loss.append(-log_prob * R)
+        returns = torch.tensor(returns)
+        returns = (returns - returns.mean()) / (returns.std() + 1e-9)
+        
+        for log_prob, G in zip(self.log_probs, returns):
+            policy_loss.append(-log_prob * G)
         
         self.optimizer_actor.zero_grad()
         policy_loss = torch.cat(policy_loss).sum()
