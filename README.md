@@ -1,8 +1,18 @@
 # Policy Gradient algorithms
 
+## REINFORCE
+
 Implementation of the REINFORCE algorithm and as described in the paper Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning [[1]](#references).
 
 The algorithm follows REINFORCE with Baseline (episodic) from Reinforcement Learning: An Introduction, p. 330 [[2]](#references).
+
+## A2C
+
+Implementation of the A2C algorithm.
+
+## DPG
+
+Implementation of the DPG algorithm.
 
 I provide a `main.py` as well as a Jupyter Notebook which demonstrate how to set up, train and compare multiple agents.
 
@@ -24,12 +34,12 @@ In `wrappers.py`, I also provide a clean implementation of a CartPole Swing Up e
 
 First download the source code.
 ```
-git clone https://github.com/maxencefaldor/reinforce.git
+git clone https://github.com/maxencefaldor/policy-gradient.git
 ```
-Finally setup the environment and install reinforce's dependencies
+Finally setup the environment and install policy-gradient's dependencies
 ```
 pip install -U pip
-pip install -r reinforce/requirements.txt
+pip install -r policy-gradient/requirements.txt
 ```
 
 ### Requirements
@@ -47,5 +57,5 @@ pip install -r reinforce/requirements.txt
 
 ## References
 
-[1] [Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning](https://people.cs.umass.edu/~barto/courses/cs687/williams92simple.pdf), Hessel et al., 2017.  
+[1] [Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning](https://people.cs.umass.edu/~barto/courses/cs687/williams92simple.pdf), Ronald J. Williams, 1992.  
 [2] [Reinforcement Learning: An Introduction](http://www.incompleteideas.net/sutton/book/ebook/the-book.html), Sutton and Barto, 1998.  
