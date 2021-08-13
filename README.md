@@ -12,7 +12,7 @@ I provide a `main.py` as well as a Jupyter Notebook which demonstrate how to set
     ├── main.py                             # Lab where agents are declared, trained and compared
     ├── .gitignore
     ├── agents
-    │   └──  reinforce_agent.py              # REINFORCE agent
+    │   └──  reinforce_agent.py             # REINFORCE agent
     └── utils
         ├── network_architectures.py        # A collection of network architectures including actors without baseline, with baseline and baseline with shared parameters
         ├── wrappers.py                     # Wrappers and utilities to create Gym environments
