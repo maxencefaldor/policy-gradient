@@ -56,30 +56,34 @@ class ReinforceAgent(object):
         prob = self.actor(state)
         m = Categorical(prob)
         action = m.sample()
-        self.log_probs.append(m.log_prob(action))
+        self.log_probs.append(m.log_prob(action).squeeze(0))
         return action.item()
     
     def learn(self):
         """Learns the policy from an episode."""
-        R = 0
+        G = 0
         baseline_loss = []
         policy_loss = []
         returns = []
         for reward in reversed(self.rewards):
-            R = reward + self.gamma * R
-            returns.append(R)
+            G = reward + self.gamma * G
+            returns.append(G)
         returns.reverse()
-        for log_prob, R, baseline in zip(self.log_probs, returns, self.baselines):
-            baseline_loss.append(F.mse_loss(baseline, torch.tensor([R]), reduction='none'))
-            policy_loss.append(-log_prob * (R - baseline))
+        returns = torch.tensor(returns)
+        baselines = torch.cat(self.baselines)
+        deltas = returns - baselines
+        deltas = (deltas - deltas.mean()) / (deltas.std() + 1e-9)
+        
+        for log_prob, G, baseline, delta in zip(self.log_probs, returns, baselines, deltas):
+            baseline_loss.append(F.mse_loss(baseline, G, reduction='none'))
+            policy_loss.append(-log_prob * delta)
         
         self.optimizer_baseline.zero_grad()
-        baseline_loss = torch.cat(baseline_loss).mean()
+        baseline_loss = torch.stack(baseline_loss).mean()
         baseline_loss.backward(retain_graph=True)
         
-        
         self.optimizer_actor.zero_grad()
-        policy_loss = torch.cat(policy_loss).sum()
+        policy_loss = torch.stack(policy_loss).sum()
         policy_loss.backward()
         
         self.optimizer_baseline.step()
