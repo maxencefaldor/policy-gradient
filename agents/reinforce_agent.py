@@ -19,9 +19,7 @@ class ReinforceAgent(object):
                  device,
                  n_actions,
                  actor,
-                 baseline=None,
-                 lr_actor=0.001,
-                 lr_baseline=0.001,
+                 lr=0.001,
                  gamma=0.99):
         """Initializes the agent.
         
@@ -35,9 +33,7 @@ class ReinforceAgent(object):
         self._device = device
         self.n_actions = n_actions
         self.actor = actor
-        self.baseline = baseline
-        self.optimizer_actor = optim.Adam(self.actor.parameters(), lr=lr_actor)
-        self.optimizer_baseline = optim.Adam(self.baseline.parameters(), lr=lr_baseline)
+        self.optimizer = optim.Adam(self.actor.parameters(), lr=lr)
         self.gamma = gamma
         self.rewards = []
         self.log_probs = []
@@ -65,29 +61,30 @@ class ReinforceAgent(object):
         baseline_loss = []
         policy_loss = []
         returns = []
+        
         for reward in reversed(self.rewards):
             G = reward + self.gamma * G
             returns.append(G)
         returns.reverse()
-        returns = torch.tensor(returns)
+        returns = torch.tensor(returns, dtype=torch.float32)
+        
         baselines = torch.cat(self.baselines)
         deltas = returns - baselines
         deltas = (deltas - deltas.mean()) / (deltas.std() + 1e-9)
         
-        for log_prob, G, baseline, delta in zip(self.log_probs, returns, baselines, deltas):
-            baseline_loss.append(F.mse_loss(baseline, G, reduction='none'))
-            policy_loss.append(-log_prob * delta)
+        for G, baseline, log_prob, delta in zip(returns, baselines,
+                                                self.log_probs, deltas):
+            baseline_loss.append(F.mse_loss(baseline, G.detach(),
+                                            reduction='none'))
+            policy_loss.append(-log_prob * delta.detach())
         
-        self.optimizer_baseline.zero_grad()
         baseline_loss = torch.stack(baseline_loss).mean()
-        baseline_loss.backward(retain_graph=True)
-        
-        self.optimizer_actor.zero_grad()
         policy_loss = torch.stack(policy_loss).sum()
-        policy_loss.backward()
+        loss = baseline_loss + policy_loss
         
-        self.optimizer_baseline.step()
-        self.optimizer_actor.step()
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         
         del self.rewards[:]
         del self.log_probs[:]
@@ -110,8 +107,9 @@ class ReinforceAgent(object):
             episode_return = 0
             state = env.reset()
             for t in count():
-                state = torch.Tensor(state).to(self._device).unsqueeze(0)
-                self.baselines.append(self.baseline(state).squeeze(0))
+                state = torch.tensor(state, dtype=torch.float32).to(
+                    self._device).unsqueeze(0)
+                self.baselines.append(self.actor.baseline(state).squeeze(0))
                 action = self.act(state)
                 next_state, reward, done, _ = env.step(action)
                 self.rewards.append(reward)
@@ -165,6 +163,8 @@ class ReinforceAgent(object):
             else:
                 env.render()
             
+            state = torch.tensor(state, dtype=torch.float32).to(
+                self._device).unsqueeze(0)
             action = self.act(state)
             next_state, reward, done, _ = env.step(action)
 
