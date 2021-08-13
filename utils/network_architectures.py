@@ -22,14 +22,10 @@ class Actor(nn.Module):
         self.fc3 = nn.Linear(n_neurons, n_actions)
     
     def forward(self, x):
-        logits = self.logits(x)
-        return F.softmax(logits, dim=1)
-    
-    def logits(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
-        return x
+        return F.softmax(x, dim=1)
 
 class Baseline(nn.Module):
     """Classic baseline network architecture."""
