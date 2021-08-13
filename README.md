@@ -1,4 +1,4 @@
-# REINFORCE
+# Policy Gradient algorithms
 
 Implementation of the REINFORCE algorithm and as described in the paper Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning [[1]](#references).
 
