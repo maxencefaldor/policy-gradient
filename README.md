@@ -22,9 +22,11 @@ I provide a `main.py` as well as a Jupyter Notebook which demonstrate how to set
     ├── main.py                             # Lab where agents are declared, trained and compared
     ├── .gitignore
     ├── agents
-    │   └──  reinforce_agent.py             # REINFORCE agent
+    │   ├──  reinforce_agent.py             # REINFORCE agent
+    │   ├──  a2c_agent.py                   # A2C agent
+    │   └──  dpg_agent.py                   # DPG agent
     └── utils
-        ├── network_architectures.py        # A collection of network architectures including actors without baseline, with baseline and baseline with shared parameters
+        ├── network_architectures.py        # A collection of network architectures for policy, value and action-value approximation
         ├── wrappers.py                     # Wrappers and utilities to create Gym environments
         └── plot.py                         # Plot utilities to display agents' performances
 
@@ -59,4 +61,7 @@ pip install -r policy-gradient/requirements.txt
 
 [1] [Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning](https://people.cs.umass.edu/~barto/courses/cs687/williams92simple.pdf), Ronald J. Williams, 1992.  
 [2] [Reinforcement Learning: An Introduction](http://www.incompleteideas.net/sutton/book/ebook/the-book.html), Sutton and Barto, 1998.  
-[3] [Policy Gradient Methods for Reinforcement Learning with Function Approximation](https://papers.nips.cc/paper/1999/file/464d828b85b0bed98e80ade0a5c43b0f-Paper.pdf)
+[3] [Policy Gradient Methods for Reinforcement Learning with Function Approximation](https://papers.nips.cc/paper/1999/file/464d828b85b0bed98e80ade0a5c43b0f-Paper.pdf), Sutton et al., 1999.  
+[4] [Asynchronous Methods for Deep Reinforcement Learning](https://arxiv.org/abs/1602.01783), Mnih et al., 2016.  
+[5] [Deterministic Policy Gradient Algorithms](http://proceedings.mlr.press/v32/silver14.pdf), Silver et al., 2014.  
+[6] [Distributed Distributional Deterministic Policy Gradients](https://arxiv.org/abs/1804.08617), Hoffman et al., 2018.  
