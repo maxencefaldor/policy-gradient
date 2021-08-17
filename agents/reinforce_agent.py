@@ -18,7 +18,7 @@ class ReinforceAgent(object):
     def __init__(self,
                  device,
                  n_actions,
-                 actor,
+                 network,
                  lr=0.001,
                  gamma=0.99):
         """Initializes the agent.
@@ -26,14 +26,14 @@ class ReinforceAgent(object):
         Args:
             device: `torch.device`, where tensors will be allocated.
             n_actions: int, number of actions the agent can take at any state.
-            actor: `torch.nn`, neural network used to approximate the policy.
+            network: `torch.nn`, neural network used to approximate the policy.
             lr: float, learning rate.
             gamma: float, discount rate.
         """
         self._device = device
         self.n_actions = n_actions
-        self.actor = actor
-        self.optimizer = optim.Adam(self.actor.parameters(), lr=lr)
+        self.network = network
+        self.optimizer = optim.Adam(self.network.parameters(), lr=lr)
         self.gamma = gamma
         self.rewards = []
         self.log_probs = []
@@ -49,7 +49,7 @@ class ReinforceAgent(object):
         Returns:
             int, action sampled from the policy.
         """
-        prob = self.actor(state)
+        prob = self.network(state)
         m = Categorical(prob)
         action = m.sample()
         self.log_probs.append(m.log_prob(action).squeeze(0))
@@ -109,7 +109,7 @@ class ReinforceAgent(object):
             for t in count():
                 state = torch.tensor(state, dtype=torch.float32).to(
                     self._device).unsqueeze(0)
-                self.baselines.append(self.actor.baseline(state).squeeze(0))
+                self.baselines.append(self.network.baseline(state).squeeze(0))
                 action = self.act(state)
                 next_state, reward, done, _ = env.step(action)
                 self.rewards.append(reward)
@@ -147,7 +147,7 @@ class ReinforceAgent(object):
             agent_name: str, filename of the recorded video. If None, the
                 episode is not recorded.
         """
-        self.actor.eval()
+        self.network.eval()
         if agent_name:
             if not os.path.exists("videos"):
                 os.mkdir("videos")
@@ -175,24 +175,24 @@ class ReinforceAgent(object):
                 if agent_name:
                     recorder.close()
                 env.close()
-                self.actor.train()
+                self.network.train()
                 return episode_return
     
     def save(self, path):
-        """Saves the actor to a disk file.
+        """Saves the network to a disk file.
         
         Args:
             path: str, path of the disk file.
         """
-        torch.save(self.actor.state_dict(), path)
+        torch.save(self.network.state_dict(), path)
     
     def load(self, path, map_location='cpu'):
-        """Loads a saved actor from a disk file.
+        """Loads a saved network from a disk file.
         
         Args:
             path: str, path of the disk file.
             map_location: str, string specifying how to remap storage
                 locations.
         """
-        self.actor.load_state_dict(torch.load(path,
+        self.network.load_state_dict(torch.load(path,
                                               map_location=map_location))
