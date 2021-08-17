@@ -2,7 +2,7 @@
 
 ## REINFORCE
 
-Implementation of the REINFORCE algorithm and as described in the paper Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning [[1]](#references).
+Implementation of the REINFORCE algorithm as described in the paper Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning [[1]](#references).
 
 The algorithm follows REINFORCE with Baseline (episodic) from Reinforcement Learning: An Introduction, p. 330 [[2]](#references).
 
@@ -59,3 +59,4 @@ pip install -r policy-gradient/requirements.txt
 
 [1] [Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning](https://people.cs.umass.edu/~barto/courses/cs687/williams92simple.pdf), Ronald J. Williams, 1992.  
 [2] [Reinforcement Learning: An Introduction](http://www.incompleteideas.net/sutton/book/ebook/the-book.html), Sutton and Barto, 1998.  
+[3] [Policy Gradient Methods for Reinforcement Learning with Function Approximation](https://papers.nips.cc/paper/1999/file/464d828b85b0bed98e80ade0a5c43b0f-Paper.pdf)
